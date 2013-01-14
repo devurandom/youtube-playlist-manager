@@ -71,6 +71,7 @@ https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
                       CLIENT_SECRETS_FILE))
 
 def get_authenticated_service():
+	http = httplib2.Http(cache=".cache")
 	flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=YOUTUBE_SCOPE,
 	                               message=MISSING_CLIENT_SECRETS_MESSAGE)
 
@@ -81,7 +82,7 @@ def get_authenticated_service():
 		credentials = run(flow, storage)
 
 	return build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
-	             http=credentials.authorize(httplib2.Http()))
+	             http=credentials.authorize(http))
 
 
 def dump_playlists(youtube, args):
