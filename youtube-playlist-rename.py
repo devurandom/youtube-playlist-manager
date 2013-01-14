@@ -99,7 +99,7 @@ def rename_playlists(youtube, args):
 			old_title = playlist["snippet"]["title"]
 			if re.match(args.pattern, old_title):
 				new_title = re.sub(args.pattern, args.replacement, old_title)
-				sys.stderr.write(u"Renaming {old} to {new}\n".format(old = old_title, new = new_title))
+				sys.stderr.write(u"Renaming '{old}' to '{new}'\n".format(old = old_title, new = new_title))
 				if not args.pretend:
 					update_req = youtube.playlists().update(
 						part = "snippet",
