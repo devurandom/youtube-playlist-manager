@@ -139,6 +139,9 @@ def load_playlists(youtube, args):
 
 		if args.prefix:
 			playlist["info"]["snippet"]["title"] = args.prefix + playlist["info"]["snippet"]["title"]
+		# Try not to confuse YouTube:
+		del playlist["info"]["id"]
+		del playlist["info"]["etag"]
 
 		playlist_new = None
 		if args.pretend:
@@ -183,6 +186,9 @@ def load_playlists(youtube, args):
 			request_payloads[request_id] = video
 
 			video["snippet"]["playlistId"] = playlist_new["id"]
+			# Try not to confuse YouTube:
+			del video["id"]
+			del video["etag"]
 
 			if not args.pretend:
 				insert_requests.append(request_id)
