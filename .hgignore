@@ -1,3 +1,4 @@
+.cache
 .*\.json
 client_secrets.json
 .*-oauth2\.json
