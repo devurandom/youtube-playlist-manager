@@ -134,8 +134,6 @@ def load_playlists(youtube, args):
 		playlists.reverse()
 
 	for playlist in playlists:
-		playlist_id = playlist["info"]["id"]
-
 		sys.stderr.write(playlist["info"]["snippet"]["title"])
 		sys.stderr.write(": ")
 
