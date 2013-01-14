@@ -140,6 +140,9 @@ def load_playlists(youtube, args):
 
 		if args.prefix:
 			playlist["info"]["snippet"]["title"] = args.prefix + playlist["info"]["snippet"]["title"]
+		# The channelId found in the backup file might not exist anymore:
+		del playlist["info"]["snippet"]["channelId"]
+
 		# Try not to confuse YouTube:
 		del playlist["info"]["id"]
 		del playlist["info"]["etag"]
@@ -187,7 +190,11 @@ def load_playlists(youtube, args):
 			request_id = video["id"]
 			request_payloads[request_id] = video
 
+			# Link to the new playlist instead of the old:
 			video["snippet"]["playlistId"] = playlist_new["id"]
+			# The channelId found in the backup file might not exist anymore:
+			del video["snippet"]["channelId"]
+
 			# Try not to confuse YouTube:
 			del video["id"]
 			del video["etag"]
