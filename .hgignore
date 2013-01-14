@@ -1,2 +1,3 @@
+.*\.json
 client_secrets.json
-.*-oauth2.json
+.*-oauth2\.json
