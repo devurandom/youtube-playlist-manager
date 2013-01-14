@@ -155,6 +155,7 @@ def load_playlists(youtube, args):
 
 		request_payloads = {}
 		insert_requests = []
+		finished_requests = []
 
 		def insert_video(request_id, response, exception):
 			payload = request_payloads[request_id]
@@ -166,10 +167,10 @@ def load_playlists(youtube, args):
 
 				if exception.resp.status == 403:
 					sys.stderr.write("WARNING: Video {id} private, skipping\n".format(id = video_id))
-					insert_requests.remove(request_id)
+					finished_requests.append(request_id)
 				elif exception.resp.status == 404:
 					sys.stderr.write("WARNING: Video {id} deleted, skipping\n".format(id = video_id))
-					insert_requests.remove(request_id)
+					finished_requests.append(request_id)
 				elif exception.resp.status in RETRIABLE_STATUS_CODES:
 					sys.stderr.write("WARNING: Server returned status {status} for video {id}, trying again\n".format(status = exception.resp.status, id = video_id))
 				else:
@@ -179,7 +180,7 @@ def load_playlists(youtube, args):
 					sys.stderr.write("Inserted video {id}\n".format(id = video_id))
 				else:
 					sys.stderr.write(".")
-				insert_requests.remove(request_id)
+				finished_requests.append(request_id)
 
 		for video in playlist["videos"]:
 			request_id = video["id"]
@@ -218,6 +219,10 @@ def load_playlists(youtube, args):
 
 			if args.batch:
 				batch_req.execute()
+
+			for request_id in finished_requests:
+				insert_requests.remove(request_id)
+			del finished_requests[:]
 
 			sys.stderr.write("\n")
 
