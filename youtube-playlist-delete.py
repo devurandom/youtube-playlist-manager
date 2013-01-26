@@ -21,6 +21,9 @@ from oauth2client.tools import run
 import simplejson as json
 
 
+# Maximum number of results YouTube allows us to retrieve in one list request
+MAX_RESULTS = 50
+
 # Explicitly tell the underlying HTTP transport library not to retry, since
 # we are handling retry logic ourselves.
 httplib2.RETRIES = 1
@@ -90,6 +93,7 @@ def delete_playlists(youtube, args):
 	playlists_req = youtube.playlists().list(
 		part = "id,snippet",
 		mine = True,
+		maxResults = MAX_RESULTS,
 	)
 
 	def delete_playlist(request_id, response, exception):
