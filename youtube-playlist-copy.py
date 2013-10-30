@@ -128,6 +128,15 @@ def copy_playlist(youtube, args):
 
 	sys.stderr.write("\n")
 
+	my_videos.sort(key = lambda video: video["snippet"]["position"])
+
+	position = 0
+	for video in my_videos:
+		if args.debug and video["snippet"]["position"] != position:
+			sys.stderr.write("Fixing position: {old} -> {new}\n".format(old = video["snippet"]["position"], new = position))
+		video["snippet"]["position"] = position
+		position = position + 1
+
 	if args.prefix:
 		playlist["snippet"]["title"] = args.prefix + playlist["snippet"]["title"]
 	# The channelId found in the original playlist is not ours:
@@ -153,8 +162,21 @@ def copy_playlist(youtube, args):
 	insert_requests = []
 	finished_requests = []
 
+	def skip(request_id):
+		finished_requests.append(request_id)
+		found_current = False
+		for insert_request_id in insert_requests:
+			if insert_request_id == request_id:
+				found_current = True
+				continue
+			if not found_current:
+				continue
+			video = request_payloads[insert_request_id]
+			video["snippet"]["position"] = video["snippet"]["position"] - 1
+
 	def insert_video(request_id, response, exception):
 		payload = request_payloads[request_id]
+		position = payload["snippet"]["position"]
 		video_id = payload["snippet"]["resourceId"]["videoId"]
 
 		if exception:
@@ -163,13 +185,19 @@ def copy_playlist(youtube, args):
 
 			if exception.resp.status == httplib.FORBIDDEN:
 				sys.stderr.write("WARNING: Video {id} private, skipping\n".format(id = video_id))
-				finished_requests.append(request_id)
+				if args.debug:
+					sys.stderr.write("Filling gap at position {position}\n".format(position = position))
+				skip(request_id)
 			elif exception.resp.status == httplib.NOT_FOUND:
 				sys.stderr.write("WARNING: Video {id} deleted, skipping\n".format(id = video_id))
-				finished_requests.append(request_id)
+				if args.debug:
+					sys.stderr.write("Filling gap at position {position}\n".format(position = position))
+				skip(request_id)
 			elif exception.resp.status in RETRIABLE_STATUS_CODES:
 				sys.stderr.write("WARNING: Server returned status {status} for video {id}, trying again\n".format(status = exception.resp.status, id = video_id))
 			else:
+				if args.debug:
+					sys.stderr.write("Error inserting video {id}:\n{video}\n".format(id = video_id, video = video))
 				raise exception
 		else:
 			if args.debug:
